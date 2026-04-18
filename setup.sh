@@ -23,8 +23,17 @@ log "Updating system..."
 apt-get update -qq && apt-get upgrade -y -qq
 
 # ── 2. Install dependencies ──
-log "Installing Docker & Docker Compose..."
-apt-get install -y -qq curl git docker.io docker-compose
+apt-get install -y -qq curl git
+
+if command -v docker &>/dev/null; then
+  warn "Docker already installed ($(docker --version)). Skipping."
+else
+  log "Installing Docker..."
+  apt-get install -y -qq docker.io docker-compose || {
+    warn "docker.io failed, trying official Docker repo..."
+    curl -fsSL https://get.docker.com | sh
+  }
+fi
 
 systemctl enable --now docker
 log "Docker started."
